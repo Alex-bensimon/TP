@@ -20,7 +20,6 @@ object SampleProgram {
     Logger.getLogger("org").setLevel(Level.OFF)
     val sparkSession = SparkSession.builder().master("local").getOrCreate()
 
-
   // EXERCICE 1
 
     // Q1 :
