@@ -44,7 +44,17 @@ object SampleProgram {
     val purcent_dicaprio = count_dicaprio_views / tot * 100
     println(purcent_dicaprio)
 
-    // Q5 :
+    // Q5.1 :
+    val counts = rdd.map(elem => (elem.split(";")(3).toString, (1.0, elem.split(";")(2).toDouble)) )
+    val count_sums = counts.reduceByKey((x,y) => (x._1 + y._1, x._2 + y._2 ))
+    val key_means = count_sums.mapValues(avgCount => avgCount._2 / avgCount._1)
+    key_means.foreach(println)
+
+    // Q5.2 :
+    val counts2 = rdd.map(elem => (elem.split(";")(3).toString, (1.0, elem.split(";")(1).toDouble)) )
+    val count_sum2 = counts2.reduceByKey((x,y) => (x._1 + y._1, x._2 + y._2 ))
+    val key_means2 = count_sum2.mapValues(avgCount => avgCount._2 / avgCount._1)
+    key_means2.foreach(println)
 
 
 
