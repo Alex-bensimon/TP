@@ -20,7 +20,7 @@ object SampleProgram {
     Logger.getLogger("org").setLevel(Level.OFF)
     val sparkSession = SparkSession.builder().master("local").getOrCreate()
 
-    /*
+
   // EXERCICE 1
 
     // Q1 :
@@ -46,7 +46,7 @@ object SampleProgram {
 
     // Q5 :
 
-  */
+
 
 
 
@@ -62,6 +62,7 @@ object SampleProgram {
     df_renamed.printSchema()
 
     // Q3 :
+
     // Q3.2
     val new_df = df_renamed.filter(col(colName = "acteur_principal")==="Di Caprio")
     val nb = new_df.count()
@@ -91,9 +92,6 @@ object SampleProgram {
     // Q4 :
     val new_column = df_renamed.withColumn("pourcentage_de_vues", (col("nombre_vues") / sum_tot)*100)
     new_column.show()
-
-
-
 
   }
 }
