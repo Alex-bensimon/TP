@@ -18,6 +18,5 @@ jobs:
     - name: Run tests
       run: sbt test
     - name: Build Project
-      run: scala build -v .
-    - name: Run Project
-      run: scala test -v .
+      run: sbt build -v .
+
