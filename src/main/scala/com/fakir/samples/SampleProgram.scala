@@ -32,13 +32,23 @@ object SampleProgram {
 
     // Q3 :
     val DiCaprio = rdd.filter(elem => elem.contains("Di Caprio"))
-    val count = DiCaprio.map(item => (item.split(";")(2).toDouble))
-    val moy = count.sum
-    print("Moyenne : " + moy/DiCaprio.count())
+    val rate_count = DiCaprio.map(item => (item.split(";")(2).toDouble))
+    val count_dicaprio = rate_count.sum
+    println("Moyenne : " + count_dicaprio/DiCaprio.count())
+
+    // Q4 :
+    val new_count = rdd.map(item => (item.split(";")(1).toDouble))
+    val tot = new_count.sum
+    val views_count = DiCaprio.map(item => (item.split(";")(1).toDouble))
+    val count_dicaprio_views = views_count.sum
+    val purcent_dicaprio = count_dicaprio_views / tot * 100
+    println(purcent_dicaprio)
+
+    // Q5 :
 
 
 
-
+  /*
     // EXERCICE 2 :
 
     // Q1 :
@@ -73,7 +83,9 @@ object SampleProgram {
     val view_mean = df_renamed.groupBy("acteur_principal").mean("nombre_vues")
     view_mean.show
 
-    val revenue = df_renamed.withColumn("poucentage_de_vues", sum / col("nombre_vues") )
+    val new_column = df_renamed.withColumn("pourcentage_de_vues", (col("nombre_vues") / sum_tot)*100)
+    new_column.show()
+  */
 
     // Q1 :
     //val df: DataFrame = sparkSession.read.option("delimiter", ",").option("inferSchema", true).option("header", true).csv("films.csv")
