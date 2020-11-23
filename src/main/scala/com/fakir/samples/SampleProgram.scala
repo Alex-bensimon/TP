@@ -2,27 +2,82 @@ package com.fakir.samples
 
 import java.text.SimpleDateFormat
 import java.util.Date
+
 import org.apache.log4j.{Level, Logger}
+import org.apache.spark
+import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.catalyst.dsl.expressions.longToLiteral
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import org.apache.spark.sql.functions._
 
+import scala.Int.{int2double, int2float}
+import scala.math.BigDecimal.double2bigDecimal
+
 object SampleProgram {
-
-  // UDF ==> User Defindes Functions
-  val transformField = udf((date : String) => {
-    val formatDate = new SimpleDateFormat("yyy-MM-dd")
-    formatDate.format(new Date(date))
-
-  })
 
   def main(args: Array[String]): Unit = {
 
     Logger.getLogger("org").setLevel(Level.OFF)
     val sparkSession = SparkSession.builder().master("local").getOrCreate()
 
+
+  // EXERCICE 1
+
     // Q1 :
-    val df: DataFrame = sparkSession.read.option("delimiter", ",").option("inferSchema", true).option("header", true).csv("donnees.csv")
-    df.show()
+    val rdd:RDD[String]= sparkSession.sparkContext.textFile("films.csv")
+
+    // Q2 :
+    val DiCaprio_count = rdd.filter(elem => elem.contains("Di Caprio")).count()
+    DiCaprio_count.foreach(println)
+
+    // Q3 :
+    val DiCaprio = rdd.filter(elem => elem.contains("Di Caprio"))
+    val count = DiCaprio.map(item => (item.split(";")(2).toDouble))
+    val moy = count.sum
+    print("Moyenne : " + moy/DiCaprio.count())
+
+
+
+
+    // EXERCICE 2 :
+
+    // Q1 :
+    val df : DataFrame = sparkSession.read.option("header", false).option("delimiter", ";").option("inferSchema", true).csv("films.csv")
+
+    // Q2 :
+    val df_renamed = df.withColumnRenamed("_c0","nom_film")
+      .withColumnRenamed("_c1","nombre_vues").withColumnRenamed("_c2","note_film")
+      .withColumnRenamed("_c3","acteur_principal")
+    df_renamed.printSchema()
+
+    // Q3 :
+    val new_df = df_renamed.filter(col(colName = "acteur_principal")==="Di Caprio")
+    val nb = new_df.count()
+    println(nb)
+
+    val mean = new_df.groupBy("acteur_principal").mean("note_film")
+    mean.show
+
+    val sum = new_df.groupBy("acteur_principal").sum("nombre_vues")
+    sum.show
+
+    val sum_tot = df_renamed.select(col("nombre_vues")).rdd.map(_(0).asInstanceOf[Long]).reduce(_+_)
+    val sum_value = sum.first().getLong(1)
+
+    val purcent = (sum_value.toDouble / sum_tot.toDouble)*100
+    println(purcent)
+
+    val rate_mean = df_renamed.groupBy("acteur_principal").mean("note_film")
+    rate_mean.show
+
+    val view_mean = df_renamed.groupBy("acteur_principal").mean("nombre_vues")
+    view_mean.show
+
+    val revenue = df_renamed.withColumn("poucentage_de_vues", sum / col("nombre_vues") )
+
+    // Q1 :
+    //val df: DataFrame = sparkSession.read.option("delimiter", ",").option("inferSchema", true).option("header", true).csv("films.csv")
+    //df.show()
       /*
     // Utilisation de l'UDF
     val transformDateDf = df.withColumn(colName="Order Date", transformField(col(colName="Order Date")))
@@ -70,4 +125,22 @@ object SampleProgram {
 
        */
   }
+  /*
+  def main(args: Array[String]): Unit = {
+    Logger.getLogger("org").setLevel(Level.OFF)
+
+    val sparkSession = SparkSession.builder().master("local").getOrCreate()
+
+
+    val rdd = sparkSession.sparkContext.textFile("{data/dataPop.csv}")
+    val filter_rdd = rdd.filter(elem => !elem.startsWith("H") || elem.split(";")(1).toDouble > 2)
+    val majRDD = filter_rdd.map((elem: String) => elem.split(";")(2))
+
+
+    val counts = rdd.map(item => (item.split(";")(2).toDouble, (1.0, item.split(";")(1).toDouble)))
+    val countSums = counts.reduceByKey((x, y) => (x._1 + y._1, x._2 + y._2))
+    val keyMeans = countSums.mapValues(avgCount => avgCount._2 / avgCount._1)
+    keyMeans.foreach(println)
+  }
+  */
 }
